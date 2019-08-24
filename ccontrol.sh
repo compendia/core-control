@@ -24,7 +24,7 @@ main () {
       exit 1
     fi
 
-    sudo apt update > /dev/null 2>&1
+    sudo apt update
     sysinfo
     install_deps &
 

@@ -287,7 +287,7 @@ install_db () {
 
 install_core () {
 
-  git clone $repo $core -b $branch > /dev/null 2>&1
+  git clone $repo $core -b $branch
 
   if [ -d $HOME/.config ]; then
     sudo chown -R $USER:$USER $HOME/.config > /dev/null 2>&1
@@ -298,7 +298,7 @@ install_core () {
   mkdir $data > /dev/null 2>&1
   cd $core > /dev/null 2>&1
 
-  yarn setup > /dev/null 2>&1
+  yarn setup
   cp -rf "$core/packages/core/bin/config/$network" "$data" > /dev/null 2>&1
 
   setefile
