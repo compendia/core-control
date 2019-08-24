@@ -3,7 +3,7 @@
 ## Installation
 
 ```sh
-git clone https://github.com/geopsllc/core-control -b ark-devnet-git
+git clone https://github.com/nos/core-control -b nos-devnet
 cd core-control
 ./ccontrol.sh arg1 [arg2]
 ```
