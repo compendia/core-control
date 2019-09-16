@@ -24,6 +24,7 @@ cd core-control
 | `config` | `reset` | Reset Config Files to Defaults |
 | `database` | `clear` | Clear the Database |
 | `rollback` | | Rollback to Specified Height |
+| `resync` | | Re-sync from genesis |
 | `plugin` | `list`/`add`/`remove`/`update` | Manage Core Plugins |
 
 ## General

@@ -260,6 +260,10 @@ main () {
 
     rollback $2
 
+  elif [[ ( "$1" = "resync" ) ]]; then
+
+    resync
+
   elif [[ ( "$1" = "database" ) && ( "$2" = "clear" ) && ( -z "$3" ) ]]; then
 
     db_clear
