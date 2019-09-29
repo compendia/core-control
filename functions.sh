@@ -82,39 +82,16 @@ start () {
   local secrets=$(cat $config/delegates.json | jq -r '.secrets')
 
   if [ "$1" = "all" ]; then
-
-    local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
-    local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
-
-    if [ "$rstatus" != "online" ]; then
-      pm2 --name "${name}-relay" start $core/packages/core/bin/run -- relay:run --network $network --token $name > /dev/null 2>&1
-    else
-      echo -e "\n${red}Process relay already running. Skipping...${nc}"
-    fi
-
-    if [ "$secrets" = "[]" ]; then
-      echo -e "\n${red}Delegate secret is missing. Forger start aborted!${nc}"
-    elif [ "$fstatus" != "online" ]; then
-      pm2 --name "${name}-forger" start $core/packages/core/bin/run -- forger:run --network $network --token $name > /dev/null 2>&1
-    else
-      echo -e "\n${red}Process forger already running. Skipping...${nc}"
-    fi
-
-    local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
-
-    if [ "$rstatus" != "online" ]; then
-      echo -e "\n${red}Process startup failed.${nc}"
-    fi
-
+      echo -e "\n${red}Please start either forger or relay.${nc}"
   else
 
     local pstatus=$(pm2status "${name}-$1" | awk '{print $4}')
 
     if [[ "$secrets" = "[]" && "$1" = "forger" ]]; then
       echo -e "\n${red}Delegate secret is missing. Forger start aborted!${nc}"
-    elif [ "$pstatus" != "online" ]; then
-      pm2 --name "${name}-$1" start $core/packages/core/bin/run -- ${1}:run --network $network --token $name > /dev/null 2>&1
-    else
+    elif [[ "$pstatus" != "online" && "$1" = "forger" ]]; then
+      pm2 --name "${name}-$1" start $core/packages/core/bin/run -- core:run --network $network --token $name > /dev/null 2>&1
+    elif [[ $1 = "forger" && "$pstatus" = "online" ]]; then
       echo -e "\n${red}Process $1 already running. Skipping...${nc}"
     fi
 
@@ -125,6 +102,7 @@ start () {
     fi
 
   fi
+
 
   pm2 save > /dev/null 2>&1
 
@@ -268,6 +246,7 @@ secure () {
 
   sudo apt install -y ufw fail2ban > /dev/null 2>&1
   sudo ufw allow 22/tcp > /dev/null 2>&1
+  sudo ufw allow 8000/tcp > /dev/null 2>&1
   sudo ufw allow ${p2p_port}/tcp > /dev/null 2>&1
   sudo ufw allow ${api_port}/tcp > /dev/null 2>&1
   sudo ufw allow ${wapi_port}/tcp > /dev/null 2>&1
@@ -506,7 +485,7 @@ resync () {
 
   stop all > /dev/null 2>&1
 
-  $core/packages/core/bin/run snapshot:rollback --height 1 --network $network --token $name
+  $core/packages/core/bin/run snapshot:truncate --network $network --token $name
 
   rm $core/plugins/storage/databases/$network.sqlite
 
