@@ -6,6 +6,8 @@
 adduser nos
 usermod -aG sudo nos
 su nos
+cd ~
+
 git clone https://github.com/nos/core-control -b nos-devnet
 cd core-control
 ./ccontrol.sh arg1 [arg2]
