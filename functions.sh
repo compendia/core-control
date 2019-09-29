@@ -96,7 +96,7 @@ start () {
 
     local pstatus=$(pm2status "${name}-$1" | awk '{print $4}')
 
-    if [ "$pstatus" != "online"  && "$1" = "relay"]; then
+    if [[ "$pstatus" != "online"  && "$1" = "relay"]]; then
       pm2 --name "${name}-$1" start $core/core/bin/run -- ${1}:run --network $network --token $name > /dev/null 2>&1
     elif [[ $1 = "relay" && "$pstatus" = "online" ]]; then
       echo -e "\n${red}Process $1 already running. Skipping...${nc}"
