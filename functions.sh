@@ -20,7 +20,6 @@ wrong_arguments () {
   echo -e "| config   | reset                        | Reset Config Files to Defaults     |"
   echo -e "| database | clear                        | Clear the Database                 |"
   echo -e "| rollback |                              | Rollback to Specified Height       |"
-  echo -e "| resync   |                              | Resync the chain from genesis      |"
   echo -e "| plugin   | list / add / remove / update | Manage Core Plugins                |"
   echo -e " ------------------------------------------------------------------------------\n"
   exit 1
@@ -478,27 +477,6 @@ rollback () {
 
 }
 
-resync () {
-
-  local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
-  local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
-
-  stop all > /dev/null 2>&1
-
-  $core/packages/core/bin/run snapshot:truncate --network $network --token $name
-
-  rm $core/plugins/storage/databases/$network.sqlite
-
-  if [ "$rstatus" = "online" ]; then
-    start relay > /dev/null 2>&1
-  fi
-
-  if [ "$fstatus" = "online" ]; then
-    start forger > /dev/null 2>&1
-  fi
-
-}
-
 update_info () {
 
   cd $basedir > /dev/null 2>&1
@@ -538,6 +516,8 @@ db_clear () {
 
   dropdb ${name}_$network > /dev/null 2>&1
   createdb ${name}_$network > /dev/null 2>&1
+
+  rm $core/plugins/storage/databases/$network.sqlite
 
   if [ "$rstatus" = "online" ]; then
     start relay > /dev/null 2>&1
