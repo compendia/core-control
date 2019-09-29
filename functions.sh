@@ -140,7 +140,7 @@ restart () {
     local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
-    if [[ "$rstatus" != "online" || "$fstatus" != "online" ]]; then
+    if [[ "$fstatus" != "online" ]]; then
       echo -e "\n${red}Core forger is offline. Use '${cyan}ccontrol restart${red}' instead.${nc}\n"
       exit 1
     elif [ -z "$api" ]; then
