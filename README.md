@@ -31,7 +31,6 @@ Never use core as root. If you're logged in as a different user (e.g. `root`), m
 | `config` | `reset` | Reset Config Files to Defaults |
 | `database` | `clear` | Clear the Database |
 | `rollback` | | Rollback to Specified Height |
-| `resync` | | Re-sync from genesis |
 | `plugin` | `list`/`add`/`remove`/`update` | Manage Core Plugins |
 
 ## General
