@@ -1,4 +1,6 @@
-# Core v2 Management Tool - Ark Devnet (git install)
+# Core v2 Management Tool - nOS Devnet (Public Testnet) (git install)
+
+A fork of https://github.com/geopsllc/core-control by @geopsllc, modified to work with nOS's core features.
 
 ## Installation
 
