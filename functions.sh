@@ -257,6 +257,9 @@ secure () {
   sudo ufw allow ${p2p_port}/tcp > /dev/null 2>&1
   sudo ufw allow ${api_port}/tcp > /dev/null 2>&1
   sudo ufw allow ${wapi_port}/tcp > /dev/null 2>&1
+  sudo ufw allow ${ipfs_port}/tcp > /dev/null 2>&1
+  sudo ufw allow ${ipfs_ws_port}/tcp > /dev/null 2>&1
+  sudo ufw allow ${storage_api_port}/tcp > /dev/null 2>&1
   sudo ufw --force enable > /dev/null 2>&1
   sudo sed -i "/^PermitRootLogin/c PermitRootLogin prohibit-password" /etc/ssh/sshd_config > /dev/null 2>&1
   sudo systemctl restart sshd.service > /dev/null 2>&1
