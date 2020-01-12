@@ -267,7 +267,7 @@ secure () {
 }
 
 install_db () {
-
+  sudo apt install -y redis-server > /dev/null 2>&1
   sudo apt install -y postgresql postgresql-contrib > /dev/null 2>&1
   sudo -u postgres psql -c "CREATE USER $USER WITH PASSWORD 'password' CREATEDB;" > /dev/null 2>&1
   dropdb ${name}_$network > /dev/null 2>&1
