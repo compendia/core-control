@@ -277,7 +277,8 @@ install_db () {
 
 install_core () {
 
-  git clone $repo $core -b $branch
+  git clone -b $branch --recurse-submodules $repo $core
+
 
   if [ -d $HOME/.config ]; then
     sudo chown -R $USER:$USER $HOME/.config > /dev/null 2>&1
