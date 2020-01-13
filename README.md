@@ -14,6 +14,7 @@ git clone https://github.com/nos/core-control -b nos-devnet
 cd core-control
 ./ccontrol.sh install core
 ./ccontrol.sh start [forger/relay]
+./ccontrol.sh logs all
 ```
 
 Never use core as root. If you're logged in as a different user (e.g. `root`), make sure to log in to the `nos` user with `su nos`.
