@@ -632,6 +632,7 @@ plugin_manage () {
       fi
 
       git pull > /dev/null 2>&1
+      git submodule update --recursive > /dev/null 2>&1
       yarn install > /dev/null 2>&1
 
       echo -e "\n${green}Plugin $2 updated successfully.${nc}\n"

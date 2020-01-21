@@ -86,6 +86,7 @@ main () {
     if [ "$?" != "0" ]; then
       rm yarn.lock > /dev/null 2>&1
       git pull > /dev/null 2>&1
+      git submodule update --recursive > /dev/null 2>&1
     fi
 
     if [ "$?" != "0" ]; then
