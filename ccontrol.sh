@@ -86,8 +86,9 @@ main () {
     if [ "$?" != "0" ]; then
       rm yarn.lock > /dev/null 2>&1
       git pull > /dev/null 2>&1
-      git submodule update --recursive > /dev/null 2>&1
     fi
+
+    git submodule update --recursive --remote > /dev/null 2>&1
 
     if [ "$?" != "0" ]; then
       echo -e "\n${red}git pull failed - check for conflicts${nc}\n"
