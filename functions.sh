@@ -298,7 +298,7 @@ install_core () {
 
 update () {
 
-  yarn setup > /dev/null 2>&1
+  yarn setup:clean
 
   local api=$(curl -Is http://127.0.0.1:5001)
   local added="$(cat $config/plugins.js | grep round-monitor)"
@@ -631,8 +631,8 @@ plugin_manage () {
         exit 1
       fi
 
-      git pull > /dev/null 2>&1
-      git submodule update --recursive > /dev/null 2>&1
+      git pull
+      git submodule update --recursive --remote
       yarn install > /dev/null 2>&1
 
       echo -e "\n${green}Plugin $2 updated successfully.${nc}\n"

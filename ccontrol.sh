@@ -81,11 +81,11 @@ main () {
       exit 1
     fi
 
-    git pull > /dev/null 2>&1
+    git pull
 
     if [ "$?" != "0" ]; then
       rm yarn.lock > /dev/null 2>&1
-      git pull > /dev/null 2>&1
+      git pull
     fi
 
     git submodule update --recursive --remote > /dev/null 2>&1
