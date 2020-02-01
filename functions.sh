@@ -278,7 +278,6 @@ install_db () {
 install_core () {
 
   git clone -b $branch --recurse-submodules $repo $core
-  git submodule update --recursive --remote
 
   if [ -d $HOME/.config ]; then
     sudo chown -R $USER:$USER $HOME/.config > /dev/null 2>&1
@@ -288,6 +287,7 @@ install_core () {
 
   mkdir $data > /dev/null 2>&1
   cd $core > /dev/null 2>&1
+  git submodule update --recursive --remote
 
   yarn setup
   cp -rf "$core/packages/core/bin/config/$network" "$data" > /dev/null 2>&1
@@ -297,7 +297,8 @@ install_core () {
 }
 
 update () {
-
+  cd $core
+  git submodule update --recursive --remote > /dev/null 2>&1
   yarn setup:clean
 
   local api=$(curl -Is http://127.0.0.1:5001)
