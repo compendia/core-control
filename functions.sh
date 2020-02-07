@@ -276,7 +276,7 @@ install_db () {
 }
 
 install_core () {
-
+  echo -e "${nc}"
   git clone -b $branch --recurse-submodules $repo $core
 
   if [ -d $HOME/.config ]; then
@@ -298,7 +298,8 @@ install_core () {
 
 update () {
   cd $core
-  git submodule update --recursive --remote > /dev/null 2>&1
+  echo -e "${nc}"
+  git submodule update --recursive --remote
   yarn setup:clean
 
   local api=$(curl -Is http://127.0.0.1:5001)

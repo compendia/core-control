@@ -28,7 +28,7 @@ main () {
     sysinfo
     install_deps &
 
-    echo -ne "${cyan}Installing Dependencies...  ${red}"
+    echo -ne "${cyan}Installing Dependencies...  ${nc}"
 
     while [ -d /proc/$! ]; do
       printf "\b${sp:i++%${#sp}:1}" && sleep .1
