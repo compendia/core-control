@@ -89,6 +89,7 @@ main () {
       git pull
     fi
 
+    git submodule sync
     git submodule update --recursive --remote
 
 

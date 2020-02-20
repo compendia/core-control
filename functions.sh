@@ -289,6 +289,7 @@ install_core () {
 
   mkdir $data > /dev/null 2>&1
   cd $core > /dev/null 2>&1
+  git submodule sync
   git submodule update --recursive --remote
 
   yarn setup
@@ -301,6 +302,7 @@ install_core () {
 update () {
   cd $core
   echo -e "${nc}"
+  git submodule sync
   git submodule update --recursive --remote
   yarn setup
 
@@ -636,6 +638,7 @@ plugin_manage () {
       fi
 
       git pull
+      git submodule sync
       git submodule update --recursive --remote
       yarn install > /dev/null 2>&1
 
