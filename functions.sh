@@ -302,7 +302,7 @@ update () {
   cd $core
   echo -e "${nc}"
   git submodule update --recursive --remote
-  yarn setup:clean
+  yarn setup
 
   local api=$(curl -Is http://127.0.0.1:5001)
   local added="$(cat $config/plugins.js | grep round-monitor)"
