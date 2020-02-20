@@ -236,7 +236,10 @@ status () {
 }
 
 install_deps () {
-
+  sudo apt update > /dev/null 2>&1
+  sudo apt -y upgrade > /dev/null 2>&1
+  sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates > /dev/null 2>&1
+  curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
   sudo timedatectl set-ntp no > /dev/null 2>&1
   sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq > /dev/null 2>&1
   sudo npm install -g n grunt-cli pm2 yarn lerna > /dev/null 2>&1
@@ -250,7 +253,6 @@ install_deps () {
 }
 
 secure () {
-
   sudo apt install -y ufw fail2ban > /dev/null 2>&1
   sudo ufw allow 22/tcp > /dev/null 2>&1
   sudo ufw allow 8000/tcp > /dev/null 2>&1
