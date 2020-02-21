@@ -90,7 +90,7 @@ main () {
     fi
 
     git submodule sync
-    git submodule update --recursive --remote
+    git submodule update --force --recursive --init --remote
 
 
     if [ "$?" != "0" ]; then
