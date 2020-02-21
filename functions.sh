@@ -236,20 +236,15 @@ status () {
 }
 
 install_deps () {
-  sudo apt update
-  sudo apt -y upgrade
-  sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
-  curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-  sudo timedatectl set-ntp no
-  sudo apt-get install nodejs -y
-  sudo apt install -y htop build-essential python git npm libpq-dev ntp gawk jq
-  sudo npm install -g n grunt-cli pm2 yarn lerna
-  pm2 install pm2-logrotate
+  sudo timedatectl set-ntp no > /dev/null 2>&1
+  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq > /dev/null 2>&1
+  sudo npm install -g n grunt-cli pm2@3 yarn lerna > /dev/null 2>&1
+  sudo n 12 > /dev/null 2>&1
+  pm2 install pm2-logrotate > /dev/null 2>&1
 
   local pm2startup="$(pm2 startup | tail -n1)"
   eval $pm2startup > /dev/null 2>&1
   pm2 save > /dev/null 2>&1
-
 }
 
 secure () {
