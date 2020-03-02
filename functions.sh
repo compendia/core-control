@@ -236,20 +236,15 @@ status () {
 }
 
 install_deps () {
-  sudo apt update > /dev/null 2>&1
-  sudo apt -y upgrade > /dev/null 2>&1
-  sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates > /dev/null 2>&1
-  curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-  sudo timedatectl set-ntp no > /dev/null 2>&1
-  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq > /dev/null 2>&1
-  sudo npm install -g n grunt-cli pm2 yarn lerna > /dev/null 2>&1
-  sudo n 10 > /dev/null 2>&1
-  pm2 install pm2-logrotate > /dev/null 2>&1
+  sudo timedatectl set-ntp no
+  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq
+  sudo npm install -g n grunt-cli pm2@3 yarn lerna
+  sudo n 12
+  pm2 install pm2-logrotate
 
   local pm2startup="$(pm2 startup | tail -n1)"
-  eval $pm2startup > /dev/null 2>&1
-  pm2 save > /dev/null 2>&1
-
+  eval $pm2startup
+  pm2 save
 }
 
 secure () {
@@ -279,7 +274,7 @@ install_db () {
 
 install_core () {
   echo -e "${nc}"
-  git clone -b $branch --recurse-submodules $repo $core
+  git clone -b $branch $repo $core
 
   if [ -d $HOME/.config ]; then
     sudo chown -R $USER:$USER $HOME/.config > /dev/null 2>&1
@@ -290,7 +285,7 @@ install_core () {
   mkdir $data > /dev/null 2>&1
   cd $core > /dev/null 2>&1
   git submodule sync
-  git submodule update --recursive --remote
+  git submodule update --force --recursive --init --remote
 
   yarn setup
   cp -rf "$core/packages/core/bin/config/$network" "$data" > /dev/null 2>&1
@@ -303,7 +298,7 @@ update () {
   cd $core
   echo -e "${nc}"
   git submodule sync
-  git submodule update --recursive --remote
+  git submodule update --force --recursive --init --remote
   yarn setup
 
   local api=$(curl -Is http://127.0.0.1:5001)
@@ -639,7 +634,7 @@ plugin_manage () {
 
       git pull
       git submodule sync
-      git submodule update --recursive --remote
+      git submodule update --force --recursive --init --remote
       yarn install > /dev/null 2>&1
 
       echo -e "\n${green}Plugin $2 updated successfully.${nc}\n"
