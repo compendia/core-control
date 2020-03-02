@@ -1,6 +1,6 @@
 #!/bin/bash
 
-wrong_arguments () {
+wrong_arguments() {
 
   echo -e "\nMissing: arg1 [arg2]\n"
   echo -e " ------------------------------------------------------------------------------"
@@ -26,15 +26,15 @@ wrong_arguments () {
 
 }
 
-pm2status () {
+pm2status() {
 
-   echo $(pm2 describe $1 2>/dev/null | grep "status")
+  echo $(pm2 describe $1 2>/dev/null | grep "status")
 
 }
 
-git_check () {
+git_check() {
 
-  git fetch > /dev/null 2>&1
+  git fetch >/dev/null 2>&1
   loc=$(git rev-parse --short @)
   rem=$(git rev-parse --short @{u})
 
@@ -46,7 +46,7 @@ git_check () {
 
 }
 
-setefile () {
+setefile() {
 
   local envFile="$config/.env"
 
@@ -56,66 +56,80 @@ setefile () {
 
   touch "$envFile"
 
-  echo "CORE_LOG_LEVEL=$log_level" >> "$envFile" 2>&1
-  echo "CORE_LOG_LEVEL_FILE=$log_level" >> "$envFile" 2>&1
-  echo "CORE_DB_HOST=localhost" >> "$envFile" 2>&1
-  echo "CORE_DB_PORT=5432" >> "$envFile" 2>&1
-  echo "CORE_DB_USERNAME=$USER" >> "$envFile" 2>&1
-  echo "CORE_DB_PASSWORD=password" >> "$envFile" 2>&1
-  echo "CORE_DB_DATABASE=${name}_$network" >> "$envFile" 2>&1
-  echo "CORE_P2P_HOST=0.0.0.0" >> "$envFile" 2>&1
-  echo "CORE_P2P_PORT=$p2p_port" >> "$envFile" 2>&1
-  echo "CORE_API_HOST=0.0.0.0" >> "$envFile" 2>&1
-  echo "CORE_API_PORT=$api_port" >> "$envFile" 2>&1
-  echo "CORE_WEBHOOKS_HOST=0.0.0.0" >> "$envFile" 2>&1
-  echo "CORE_WEBHOOKS_PORT=$wh_port" >> "$envFile" 2>&1
-  echo "CORE_WALLET_API_HOST=0.0.0.0" >> "$envFile" 2>&1
-  echo "CORE_WALLET_API_PORT=$wapi_port" >> "$envFile" 2>&1
-  echo "CORE_EXCHANGE_JSON_RPC_HOST=0.0.0.0" >> "$envFile" 2>&1
-  echo "CORE_EXCHANGE_JSON_RPC_PORT=$rpc_port" >> "$envFile" 2>&1
+  echo "CORE_LOG_LEVEL=$log_level" >>"$envFile" 2>&1
+  echo "CORE_LOG_LEVEL_FILE=$log_level" >>"$envFile" 2>&1
+  echo "CORE_DB_HOST=localhost" >>"$envFile" 2>&1
+  echo "CORE_DB_PORT=5432" >>"$envFile" 2>&1
+  echo "CORE_DB_USERNAME=$USER" >>"$envFile" 2>&1
+  echo "CORE_DB_PASSWORD=password" >>"$envFile" 2>&1
+  echo "CORE_DB_DATABASE=${name}_$network" >>"$envFile" 2>&1
+  echo "CORE_P2P_HOST=0.0.0.0" >>"$envFile" 2>&1
+  echo "CORE_P2P_PORT=$p2p_port" >>"$envFile" 2>&1
+  echo "CORE_API_HOST=0.0.0.0" >>"$envFile" 2>&1
+  echo "CORE_API_PORT=$api_port" >>"$envFile" 2>&1
+  echo "CORE_WEBHOOKS_HOST=0.0.0.0" >>"$envFile" 2>&1
+  echo "CORE_WEBHOOKS_PORT=$wh_port" >>"$envFile" 2>&1
+  echo "CORE_WALLET_API_HOST=0.0.0.0" >>"$envFile" 2>&1
+  echo "CORE_WALLET_API_PORT=$wapi_port" >>"$envFile" 2>&1
+  echo "CORE_EXCHANGE_JSON_RPC_HOST=0.0.0.0" >>"$envFile" 2>&1
+  echo "CORE_EXCHANGE_JSON_RPC_PORT=$rpc_port" >>"$envFile" 2>&1
 
 }
 
-start () {
+start() {
 
   local secrets=$(cat $config/delegates.json | jq -r '.secrets')
 
   if [ "$1" = "all" ]; then
-      echo -e "\n${red}Please start either forger or relay.${nc}"
+
+    local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
+    local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
+
+    if [ "$rstatus" != "online" ]; then
+      pm2 --name "${name}-relay" start $core/core/bin/run -- relay:run --network $network --token $name >/dev/null 2>&1
+    else
+      echo -e "\n${red}Process relay already running. Skipping...${nc}"
+    fi
+
+    if [ "$secrets" = "[]" ]; then
+      echo -e "\n${red}Delegate secret is missing. Forger start aborted!${nc}"
+    elif [ "$fstatus" != "online" ]; then
+      pm2 --name "${name}-forger" start $core/core/bin/run -- forger:run --network $network --token $name >/dev/null 2>&1
+    else
+      echo -e "\n${red}Process forger already running. Skipping...${nc}"
+    fi
+
+    local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
+
+    if [ "$rstatus" != "online" ]; then
+      echo -e "\n${red}Process startup failed.${nc}"
+    fi
+
   else
 
     local pstatus=$(pm2status "${name}-$1" | awk '{print $4}')
 
     if [[ "$secrets" = "[]" && "$1" = "forger" ]]; then
       echo -e "\n${red}Delegate secret is missing. Forger start aborted!${nc}"
-    elif [[ "$pstatus" != "online" && "$1" = "forger" ]]; then
-      pm2 --name "${name}-$1" start $core/packages/core/bin/run -- core:run --network $network --token $name > /dev/null 2>&1
-    elif [[ $1 = "forger" && "$pstatus" = "online" ]]; then
+    elif [ "$pstatus" != "online" ]; then
+      pm2 --name "${name}-$1" start $core/core/bin/run -- ${1}:run --network $network --token $name >/dev/null 2>&1
+    else
       echo -e "\n${red}Process $1 already running. Skipping...${nc}"
     fi
 
-    local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
+    local pstatus=$(pm2status "${name}-$1" | awk '{print $4}')
 
-    if [[ "$rstatus" != "online" && "$1" = "relay" ]]; then
-      pm2 --name "${name}-$1" start $core/packages/core/bin/run -- relay:run --network $network --token $name > /dev/null 2>&1
-    elif [[ $1 = "relay" && "$pstatus" = "online" ]]; then
-      echo -e "\n${red}Process $1 already running. Skipping...${nc}"
-    fi
-
-    local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
-
-    if [[ "$rstatus" != "online" && "$1" = "relay" ]]; then
+    if [[ "$pstatus" != "online" && "$1" = "relay" ]]; then
       echo -e "\n${red}Process startup failed.${nc}"
     fi
 
   fi
 
-
-  pm2 save > /dev/null 2>&1
+  pm2 save >/dev/null 2>&1
 
 }
 
-restart () {
+restart() {
 
   if [ "$1" = "all" ]; then
 
@@ -123,13 +137,13 @@ restart () {
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
     if [ "$rstatus" = "online" ]; then
-      pm2 restart ${name}-relay > /dev/null 2>&1
+      pm2 restart ${name}-relay >/dev/null 2>&1
     else
       echo -e "\n${red}Process relay not running. Skipping...${nc}"
     fi
 
     if [ "$fstatus" = "online" ]; then
-      pm2 restart ${name}-forger > /dev/null 2>&1
+      pm2 restart ${name}-forger >/dev/null 2>&1
     else
       echo -e "\n${red}Process forger not running. Skipping...${nc}"
     fi
@@ -140,14 +154,14 @@ restart () {
     local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
-    if [[ "$fstatus" != "online" ]]; then
+    if [[ "$rstatus" != "online" || "$fstatus" != "online" ]]; then
       echo -e "\n${red}Core forger is offline. Use '${cyan}ccontrol restart${red}' instead.${nc}\n"
       exit 1
     elif [ -z "$api" ]; then
       echo -e "\n${red}Plugin round-monitor not active. Use '${cyan}ccontrol restart${red}' instead.${nc}\n"
       exit 1
     else
-      curl -X POST http://127.0.0.1:5001/restart > /dev/null 2>&1
+      curl -X POST http://127.0.0.1:5001/restart >/dev/null 2>&1
       echo -e "\n${green}Restart requested. Check logs to monitor progress.${nc}"
     fi
 
@@ -156,7 +170,7 @@ restart () {
     local pstatus=$(pm2status "${name}-$1" | awk '{print $4}')
 
     if [ "$pstatus" = "online" ]; then
-      pm2 restart ${name}-$1 > /dev/null 2>&1
+      pm2 restart ${name}-$1 >/dev/null 2>&1
     else
       echo -e "\n${red}Process $1 not running. Skipping...${nc}"
     fi
@@ -165,7 +179,7 @@ restart () {
 
 }
 
-stop () {
+stop() {
 
   if [ "$1" = "all" ]; then
 
@@ -173,13 +187,13 @@ stop () {
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
     if [ "$rstatus" = "online" ]; then
-      pm2 stop ${name}-relay > /dev/null 2>&1
+      pm2 stop ${name}-relay >/dev/null 2>&1
     else
       echo -e "\n${red}Process relay not running. Skipping...${nc}"
     fi
 
     if [ "$fstatus" = "online" ]; then
-      pm2 stop ${name}-forger > /dev/null 2>&1
+      pm2 stop ${name}-forger >/dev/null 2>&1
     else
       echo -e "\n${red}Process forger not running. Skipping...${nc}"
     fi
@@ -189,18 +203,17 @@ stop () {
     local pstatus=$(pm2status "${name}-$1" | awk '{print $4}')
 
     if [ "$pstatus" = "online" ]; then
-      pm2 stop ${name}-$1 > /dev/null 2>&1
+      pm2 stop ${name}-$1 >/dev/null 2>&1
     else
       echo -e "\n${red}Process $1 not running. Skipping...${nc}"
     fi
 
   fi
 
-  pm2 save > /dev/null 2>&1
+  pm2 save >/dev/null 2>&1
 
 }
-
-status () {
+status() {
 
   echo -e -n "\n${cyan}${name}-core${nc} v${cyan}${corever}${nc} "
 
@@ -235,7 +248,8 @@ status () {
 
 }
 
-install_deps () {
+  sudo apt update >/dev/null 2>&1
+  sudo apt -y upgrade >/dev/null 2>&1
   sudo timedatectl set-ntp no
   sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq
   sudo npm install -g n grunt-cli pm2@3 yarn lerna
@@ -247,54 +261,54 @@ install_deps () {
   pm2 save
 }
 
-secure () {
-  sudo apt install -y ufw fail2ban > /dev/null 2>&1
-  sudo ufw allow 22/tcp > /dev/null 2>&1
-  sudo ufw allow 8000/tcp > /dev/null 2>&1
-  sudo ufw allow ${p2p_port}/tcp > /dev/null 2>&1
-  sudo ufw allow ${api_port}/tcp > /dev/null 2>&1
-  sudo ufw allow ${wapi_port}/tcp > /dev/null 2>&1
-  sudo ufw allow ${ipfs_port}/tcp > /dev/null 2>&1
-  sudo ufw allow ${ipfs_ws_port}/tcp > /dev/null 2>&1
-  sudo ufw allow ${storage_api_port}/tcp > /dev/null 2>&1
-  sudo ufw --force enable > /dev/null 2>&1
-  sudo sed -i "/^PermitRootLogin/c PermitRootLogin prohibit-password" /etc/ssh/sshd_config > /dev/null 2>&1
-  sudo systemctl restart sshd.service > /dev/null 2>&1
+secure() {
+  sudo apt install -y ufw fail2ban >/dev/null 2>&1
+  sudo ufw allow 22/tcp >/dev/null 2>&1
+  sudo ufw allow 8000/tcp >/dev/null 2>&1
+  sudo ufw allow ${p2p_port}/tcp >/dev/null 2>&1
+  sudo ufw allow ${api_port}/tcp >/dev/null 2>&1
+  sudo ufw allow ${wapi_port}/tcp >/dev/null 2>&1
+  sudo ufw allow ${ipfs_port}/tcp >/dev/null 2>&1
+  sudo ufw allow ${ipfs_ws_port}/tcp >/dev/null 2>&1
+  sudo ufw allow ${storage_api_port}/tcp >/dev/null 2>&1
+  sudo ufw --force enable >/dev/null 2>&1
+  sudo sed -i "/^PermitRootLogin/c PermitRootLogin prohibit-password" /etc/ssh/sshd_config >/dev/null 2>&1
+  sudo systemctl restart sshd.service >/dev/null 2>&1
 
 }
 
-install_db () {
-  sudo apt install -y redis-server > /dev/null 2>&1
-  sudo apt install -y postgresql postgresql-contrib > /dev/null 2>&1
-  sudo -u postgres psql -c "CREATE USER $USER WITH PASSWORD 'password' CREATEDB;" > /dev/null 2>&1
-  dropdb ${name}_$network > /dev/null 2>&1
-  createdb ${name}_$network > /dev/null 2>&1
+install_db() {
+  sudo apt install -y redis-server >/dev/null 2>&1
+  sudo apt install -y postgresql postgresql-contrib >/dev/null 2>&1
+  sudo -u postgres psql -c "CREATE USER $USER WITH PASSWORD 'password' CREATEDB;" >/dev/null 2>&1
+  dropdb ${name}_$network >/dev/null 2>&1
+  createdb ${name}_$network >/dev/null 2>&1
 
 }
 
-install_core () {
+install_core() {
   echo -e "${nc}"
   git clone -b $branch $repo $core
 
   if [ -d $HOME/.config ]; then
-    sudo chown -R $USER:$USER $HOME/.config > /dev/null 2>&1
+    sudo chown -R $USER:$USER $HOME/.config >/dev/null 2>&1
   else
-    mkdir $HOME/.config > /dev/null 2>&1
+    mkdir $HOME/.config >/dev/null 2>&1
   fi
 
-  mkdir $data > /dev/null 2>&1
-  cd $core > /dev/null 2>&1
+  mkdir $data >/dev/null 2>&1
+  cd $core >/dev/null 2>&1
   git submodule sync
   git submodule update --force --recursive --init --remote
 
   yarn setup
-  cp -rf "$core/packages/core/bin/config/$network" "$data" > /dev/null 2>&1
+  cp -rf "$core/packages/core/bin/config/$network" "$data" >/dev/null 2>&1
 
   setefile
 
 }
 
-update () {
+update() {
   cd $core
   echo -e "${nc}"
   git submodule sync
@@ -311,10 +325,10 @@ update () {
     if [ ! -z "$(cat $config/plugins.js | grep $plugin)" ]; then
 
       . "$basedir/plugins/$plugin"
-      mkdir $core/node_modules/$npmrepo > /dev/null 2>&1
-      git clone $gitrepo/$plugin $core/node_modules/$npmrepo/$plugin > /dev/null 2>&1
-      cd $core/node_modules/$npmrepo/$plugin > /dev/null 2>&1
-      yarn install > /dev/null 2>&1
+      mkdir $core/node_modules/$npmrepo >/dev/null 2>&1
+      git clone $gitrepo/$plugin $core/node_modules/$npmrepo/$plugin >/dev/null 2>&1
+      cd $core/node_modules/$npmrepo/$plugin >/dev/null 2>&1
+      yarn install >/dev/null 2>&1
 
     fi
 
@@ -322,50 +336,50 @@ update () {
 
   if [[ "$rstatus" = "online" && "$fstatus" = "online" && ! -z "$api" && ! -z "added" ]]; then
 
-    curl -X POST http://127.0.0.1:5001/restart > /dev/null 2>&1
+    curl -X POST http://127.0.0.1:5001/restart >/dev/null 2>&1
 
   else
 
     if [ "$rstatus" = "online" ]; then
-      pm2 restart ${name}-relay > /dev/null 2>&1
+      pm2 restart ${name}-relay >/dev/null 2>&1
     fi
 
     if [ "$fstatus" = "online" ]; then
-      pm2 restart ${name}-forger > /dev/null 2>&1
+      pm2 restart ${name}-forger >/dev/null 2>&1
     fi
 
   fi
 
 }
 
-remove () {
+remove() {
 
-  pm2 delete ${name}-forger > /dev/null 2>&1
-  pm2 delete ${name}-relay > /dev/null 2>&1
-  pm2 save > /dev/null 2>&1
-  rm -rf $core > /dev/null 2>&1
-  rm -rf $data > /dev/null 2>&1
-  rm -rf $HOME/.cache/${name}-core > /dev/null 2>&1
-  rm -rf $HOME/.local/share/${name}-core > /dev/null 2>&1
-  rm -rf $HOME/.local/state/${name}-core > /dev/null 2>&1
-  rm -rf /tmp/$USER/${name}-core > /dev/null 2>&1
-  dropdb ${name}_$network > /dev/null 2>&1
-  sudo ufw delete allow $p2p_port/tcp > /dev/null 2>&1
-  sudo ufw delete allow $api_port/tcp > /dev/null 2>&1
-  sudo ufw delete allow $wapi_port/tcp > /dev/null 2>&1
+  pm2 delete ${name}-forger >/dev/null 2>&1
+  pm2 delete ${name}-relay >/dev/null 2>&1
+  pm2 save >/dev/null 2>&1
+  rm -rf $core >/dev/null 2>&1
+  rm -rf $data >/dev/null 2>&1
+  rm -rf $HOME/.cache/${name}-core >/dev/null 2>&1
+  rm -rf $HOME/.local/share/${name}-core >/dev/null 2>&1
+  rm -rf $HOME/.local/state/${name}-core >/dev/null 2>&1
+  rm -rf /tmp/$USER/${name}-core >/dev/null 2>&1
+  dropdb ${name}_$network >/dev/null 2>&1
+  sudo ufw delete allow $p2p_port/tcp >/dev/null 2>&1
+  sudo ufw delete allow $api_port/tcp >/dev/null 2>&1
+  sudo ufw delete allow $wapi_port/tcp >/dev/null 2>&1
 
 }
 
-config_reset () {
+config_reset() {
 
-  stop all > /dev/null 2>&1
-  rm -rf $config > /dev/null 2>&1
-  cp -rf "$core/packages/core/bin/config/$network" "$data" > /dev/null 2>&1
+  stop all >/dev/null 2>&1
+  rm -rf $config >/dev/null 2>&1
+  cp -rf "$core/packages/core/bin/config/$network" "$data" >/dev/null 2>&1
   setefile
 
 }
 
-sysinfo () {
+sysinfo() {
 
   local sockets="$(lscpu | grep "Socket(s):" | head -n1 | awk '{ printf $2 }')"
   local cps="$(lscpu | grep "Core(s) per socket:" | awk '{ printf $4 }')"
@@ -380,8 +394,8 @@ sysinfo () {
   echo -e "\n${cyan}System: ${nc}$os"
   w | head -n1
 
-  echo -e "\n${cyan}CPU(s): ${nc}${sockets}x ${cpu}with $cps Cores and $[cps*tpc] Threads"
-  echo -ne " ${cyan}Total: ${nc}$[sockets*cps] Cores and $[sockets*cps*tpc] Threads"
+  echo -e "\n${cyan}CPU(s): ${nc}${sockets}x ${cpu}with $cps Cores and $((cps * tpc)) Threads"
+  echo -ne " ${cyan}Total: ${nc}$((sockets * cps)) Cores and $((sockets * cps * tpc)) Threads"
   if [ -z "$maxmhz" ]; then
     echo -e " @ ${mhz}MHz"
   else
@@ -401,7 +415,7 @@ sysinfo () {
 
 }
 
-sysupdate () {
+sysupdate() {
 
   sudo apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade -y
   sudo apt-get autoremove -y
@@ -409,7 +423,7 @@ sysupdate () {
 
 }
 
-logs () {
+logs() {
 
   if [ "$1" = "all" ]; then
     pm2 logs
@@ -419,39 +433,39 @@ logs () {
 
 }
 
-secret () {
+secret() {
 
   if [ "$1" = "set" ]; then
     local scrt="$2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}"
-    jq --arg scrt "$scrt" '.secrets = [$scrt]' $config/delegates.json > delegates.tmp
+    jq --arg scrt "$scrt" '.secrets = [$scrt]' $config/delegates.json >delegates.tmp
   else
-    jq '.secrets = []' $config/delegates.json > delegates.tmp
+    jq '.secrets = []' $config/delegates.json >delegates.tmp
   fi
 
   mv delegates.tmp $config/delegates.json
 
 }
 
-snapshot () {
+snapshot() {
 
   if [ "$1" = "restore" ]; then
 
     local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
-    stop all > /dev/null 2>&1
+    stop all >/dev/null 2>&1
 
-    dropdb ${name}_$network > /dev/null 2>&1
-    createdb ${name}_$network > /dev/null 2>&1
+    dropdb ${name}_$network >/dev/null 2>&1
+    createdb ${name}_$network >/dev/null 2>&1
 
     $core/packages/core/bin/run snapshot:restore --network $network --token $name
 
     if [ "$rstatus" = "online" ]; then
-      start relay > /dev/null 2>&1
+      start relay >/dev/null 2>&1
     fi
 
     if [ "$fstatus" = "online" ]; then
-      start forger > /dev/null 2>&1
+      start forger >/dev/null 2>&1
     fi
 
   else
@@ -462,37 +476,37 @@ snapshot () {
 
 }
 
-selfremove () {
+selfremove() {
 
-  cd $HOME > /dev/null 2>&1
-  rm -rf $basedir > /dev/null 2>&1
-  sed -i '/ccontrol/d' $HOME/.bashrc > /dev/null 2>&1
-  sed -i '/cccomp/d' $HOME/.bashrc > /dev/null 2>&1
+  cd $HOME >/dev/null 2>&1
+  rm -rf $basedir >/dev/null 2>&1
+  sed -i '/ccontrol/d' $HOME/.bashrc >/dev/null 2>&1
+  sed -i '/cccomp/d' $HOME/.bashrc >/dev/null 2>&1
 
 }
 
-rollback () {
+rollback() {
 
   local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
   local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
-  stop all > /dev/null 2>&1
+  stop all >/dev/null 2>&1
 
   $core/packages/core/bin/run snapshot:rollback --height $1 --network $network --token $name
 
   if [ "$rstatus" = "online" ]; then
-    start relay > /dev/null 2>&1
+    start relay >/dev/null 2>&1
   fi
 
   if [ "$fstatus" = "online" ]; then
-    start forger > /dev/null 2>&1
+    start forger >/dev/null 2>&1
   fi
 
 }
 
-update_info () {
+update_info() {
 
-  cd $basedir > /dev/null 2>&1
+  cd $basedir >/dev/null 2>&1
   git_check
 
   echo -e -n "\n${cyan}core-control${nc} v${cyan}${version}${nc} hash: ${cyan}${loc}${nc} status: "
@@ -505,7 +519,7 @@ update_info () {
 
   if [ -d $core ]; then
 
-    cd $core > /dev/null 2>&1
+    cd $core >/dev/null 2>&1
     git_check
 
     echo -e -n "${cyan}${name}-core${nc} v${cyan}${corever}${nc} hash: ${cyan}${loc}${nc} status: "
@@ -520,29 +534,29 @@ update_info () {
 
 }
 
-db_clear () {
+db_clear() {
 
   local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
   local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
-  stop all > /dev/null 2>&1
+  stop all >/dev/null 2>&1
 
-  dropdb ${name}_$network > /dev/null 2>&1
-  createdb ${name}_$network > /dev/null 2>&1
+  dropdb ${name}_$network >/dev/null 2>&1
+  createdb ${name}_$network >/dev/null 2>&1
 
   rm $core/plugins/storage/databases/$network.sqlite
 
   if [ "$rstatus" = "online" ]; then
-    start relay > /dev/null 2>&1
+    start relay >/dev/null 2>&1
   fi
 
   if [ "$fstatus" = "online" ]; then
-    start forger > /dev/null 2>&1
+    start forger >/dev/null 2>&1
   fi
 
 }
 
-plugin_list () {
+plugin_list() {
 
   echo -e "\nAvailable plugins:\n"
 
@@ -562,88 +576,92 @@ plugin_list () {
 
 }
 
-plugin_manage () {
+plugin_manage() {
 
-    if [ ! -f plugins/$2 ]; then
-      echo -e "\n${red}Plugin $2 not found.${nc}\n"
+  if [ ! -f plugins/$2 ]; then
+    echo -e "\n${red}Plugin $2 not found.${nc}\n"
+    exit 1
+  else
+    . "plugins/$2"
+  fi
+
+  added="$(cat $config/plugins.js | grep $2)"
+  lastline='};'
+  blockend='},'
+  stab='    '
+
+  if [[ "$1" = "add" && -z "$added" ]]; then
+
+    alen=${#options[@]}
+    insert="$stab\"$npmrepo\/$2\": {\n"
+
+    for i in ${!options[@]}; do
+      insert="$insert\t${options[$i]}"
+      comp=$((i + 1))
+      if [ "$comp" -lt "$alen" ]; then
+        insert="$insert,\n"
+      else
+        insert="$insert\n"
+      fi
+    done
+
+    insert="$insert$stab$blockend\n"
+    sed -i "s/$lastline/$insert$lastline/" $config/plugins.js
+
+    mkdir $core/node_modules/$npmrepo >/dev/null 2>&1
+    git clone $gitrepo/$2 $core/node_modules/$npmrepo/$2 >/dev/null 2>&1
+    cd $core/node_modules/$npmrepo/$2
+    yarn install >/dev/null 2>&1
+
+    echo -e "\n${green}Plugin $2 installed with default settings.${nc}\n"
+    echo -e "${red}Restart Core for the changes to take effect.${nc}\n"
+    echo -e "${cyan}For more information and custom configuration${nc}"
+    echo -e "${cyan}visit $gitrepo/$2${nc}\n"
+
+  elif [[ "$1" = "add" && ! -z "$added" ]]; then
+
+    echo -e "\n${red}Plugin $2 already installed.${nc}\n"
+
+  elif
+    [[ "$1" = "remove" && ! -z "$added" ]]
+  then
+
+    sed -i "/$2/,/$blockend/d" $config/plugins.js
+    rm -rf $core/node_modules/$npmrepo/$2 >/dev/null 2>&1
+
+    echo -e "\n${green}Plugin $2 removed successfully.${nc}\n"
+    echo -e "${red}Restart Core for the changes to take effect.${nc}\n"
+
+  elif [[ "$1" = "remove" && -z "$added" ]]; then
+
+    echo -e "\n${red}Plugin $2 not installed.${nc}\n"
+
+  elif [[ "$1" = "update" && ! -z "$added" ]]; then
+
+    cd $core/node_modules/$npmrepo/$2 >/dev/null 2>&1
+    git_check
+
+    if [ "$up2date" = "yes" ]; then
+      echo -e "Already up-to-date."
       exit 1
-    else
-      . "plugins/$2"
     fi
 
-    added="$(cat $config/plugins.js | grep $2)"
-    lastline='};'
-    blockend='},'
-    stab='    '
+    git pull
+    git submodule sync
+    git submodule update --recursive --remote
+    yarn install >/dev/null 2>&1
 
-
-    if [[ "$1" = "add" && -z "$added" ]]; then
-
-      alen=${#options[@]}
-      insert="$stab\"$npmrepo\/$2\": {\n"
-
-      for i in ${!options[@]}; do
-        insert="$insert\t${options[$i]}"
-        comp=$((i+1))
-        if [ "$comp" -lt "$alen" ]; then
-          insert="$insert,\n"
-        else
-          insert="$insert\n"
-        fi
-      done
-
-      insert="$insert$stab$blockend\n"
-      sed -i "s/$lastline/$insert$lastline/" $config/plugins.js
-
-      mkdir $core/node_modules/$npmrepo > /dev/null 2>&1
-      git clone $gitrepo/$2 $core/node_modules/$npmrepo/$2 > /dev/null 2>&1
-      cd $core/node_modules/$npmrepo/$2
-      yarn install > /dev/null 2>&1
-
-      echo -e "\n${green}Plugin $2 installed with default settings.${nc}\n"
-      echo -e "${red}Restart Core for the changes to take effect.${nc}\n"
-      echo -e "${cyan}For more information and custom configuration${nc}"
-      echo -e "${cyan}visit $gitrepo/$2${nc}\n"
-
-    elif [[ "$1" = "add" && ! -z "$added" ]]; then
-
-      echo -e "\n${red}Plugin $2 already installed.${nc}\n"
-
-
-    elif [[ "$1" = "remove" && ! -z "$added" ]]; then
-
-      sed -i "/$2/,/$blockend/d" $config/plugins.js
-      rm -rf $core/node_modules/$npmrepo/$2 > /dev/null 2>&1
-
-      echo -e "\n${green}Plugin $2 removed successfully.${nc}\n"
-      echo -e "${red}Restart Core for the changes to take effect.${nc}\n"
-
-    elif [[ "$1" = "remove" && -z "$added" ]]; then
-
-      echo -e "\n${red}Plugin $2 not installed.${nc}\n"
-
-    elif [[ "$1" = "update" && ! -z "$added" ]]; then
-
-      cd $core/node_modules/$npmrepo/$2 > /dev/null 2>&1
-      git_check
-
-      if [ "$up2date" = "yes" ]; then
-        echo -e "Already up-to-date."
-        exit 1
-      fi
+    echo -e "\n${green}Plugin $2 updated successfully.${nc}\n"
+    echo -e "${red}Restart Core for the changes to take effect.${nc}\n"
 
       git pull
       git submodule sync
       git submodule update --force --recursive --init --remote
       yarn install > /dev/null 2>&1
+  else
 
-      echo -e "\n${green}Plugin $2 updated successfully.${nc}\n"
-      echo -e "${red}Restart Core for the changes to take effect.${nc}\n"
+    echo -e "\n${red}Plugin $2 not installed.${nc}\n"
 
-    else
-
-      echo -e "\n${red}Plugin $2 not installed.${nc}\n"
-
-    fi
+  fi
 
 }
