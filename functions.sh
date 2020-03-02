@@ -300,8 +300,6 @@ install_core() {
 
   mkdir $data >/dev/null 2>&1
   cd $core >/dev/null 2>&1
-  git submodule sync
-  git submodule update --recursive --remote
 
   yarn setup
   cp -rf "$core/packages/core/bin/config/$network" "$data" >/dev/null 2>&1
@@ -313,8 +311,6 @@ install_core() {
 update() {
   cd $core
   echo -e "${nc}"
-  git submodule sync
-  git submodule update --recursive --remote
   yarn setup
 
   local api=$(curl -Is http://127.0.0.1:5001)
@@ -649,8 +645,6 @@ plugin_manage() {
     fi
 
     git pull
-    git submodule sync
-    git submodule update --recursive --remote
     yarn install >/dev/null 2>&1
 
     echo -e "\n${green}Plugin $2 updated successfully.${nc}\n"
