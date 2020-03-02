@@ -249,8 +249,8 @@ status() {
 }
 
 install_deps () {
-  sudo apt-get update -y
-  sudo apt-get upgrade -y
+  sudo apt-get update -y > /dev/null 2>&1
+  sudo apt-get upgrade -y > /dev/null 2>&1
   sudo timedatectl set-ntp no > /dev/null 2>&1
   sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq > /dev/null 2>&1
   sudo npm install -g n grunt-cli pm2@3 yarn lerna > /dev/null 2>&1
@@ -290,7 +290,7 @@ install_db() {
 
 install_core() {
   echo -e "${nc}"
-  git clone -b $branch --recurse-submodules $repo $core
+  git clone -b $branch $repo $core
 
   if [ -d $HOME/.config ]; then
     sudo chown -R $USER:$USER $HOME/.config >/dev/null 2>&1
