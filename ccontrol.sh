@@ -89,9 +89,6 @@ main () {
       git pull
     fi
 
-    git submodule sync
-    git submodule update --force --recursive --init --remote
-
 
     if [ "$?" != "0" ]; then
       echo -e "\n${red}git pull failed - check for conflicts${nc}\n"

@@ -86,7 +86,7 @@ start() {
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
 
     if [ "$rstatus" != "online" ]; then
-      pm2 --name "${name}-relay" start $core/core/bin/run -- relay:run --network $network --token $name >/dev/null 2>&1
+      pm2 --name "${name}-relay" start $core/packages/core/bin/run -- relay:run --network $network --token $name >/dev/null 2>&1
     else
       echo -e "\n${red}Process relay already running. Skipping...${nc}"
     fi
@@ -94,7 +94,7 @@ start() {
     if [ "$secrets" = "[]" ]; then
       echo -e "\n${red}Delegate secret is missing. Forger start aborted!${nc}"
     elif [ "$fstatus" != "online" ]; then
-      pm2 --name "${name}-forger" start $core/core/bin/run -- forger:run --network $network --token $name >/dev/null 2>&1
+      pm2 --name "${name}-forger" start $core/packages/core/bin/run -- forger:run --network $network --token $name >/dev/null 2>&1
     else
       echo -e "\n${red}Process forger already running. Skipping...${nc}"
     fi
@@ -112,7 +112,7 @@ start() {
     if [[ "$secrets" = "[]" && "$1" = "forger" ]]; then
       echo -e "\n${red}Delegate secret is missing. Forger start aborted!${nc}"
     elif [ "$pstatus" != "online" ]; then
-      pm2 --name "${name}-$1" start $core/core/bin/run -- ${1}:run --network $network --token $name >/dev/null 2>&1
+      pm2 --name "${name}-$1" start $core/packages/core/bin/run -- ${1}:run --network $network --token $name >/dev/null 2>&1
     else
       echo -e "\n${red}Process $1 already running. Skipping...${nc}"
     fi
@@ -248,17 +248,19 @@ status() {
 
 }
 
-  sudo apt update >/dev/null 2>&1
-  sudo apt -y upgrade >/dev/null 2>&1
-  sudo timedatectl set-ntp no
-  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq
-  sudo npm install -g n grunt-cli pm2@3 yarn lerna
-  sudo n 12
-  pm2 install pm2-logrotate
+install_deps () {
+  sudo apt-get update -y > /dev/null 2>&1
+  sudo apt-get upgrade -y > /dev/null 2>&1
+  sudo timedatectl set-ntp no > /dev/null 2>&1
+  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev ntp gawk jq > /dev/null 2>&1
+  sudo npm install -g n grunt-cli pm2@3 yarn lerna > /dev/null 2>&1
+  sudo n 12 > /dev/null 2>&1
+  pm2 install pm2-logrotate > /dev/null 2>&1
 
   local pm2startup="$(pm2 startup | tail -n1)"
-  eval $pm2startup
-  pm2 save
+  eval $pm2startup > /dev/null 2>&1
+  pm2 save > /dev/null 2>&1
+
 }
 
 secure() {
@@ -298,8 +300,6 @@ install_core() {
 
   mkdir $data >/dev/null 2>&1
   cd $core >/dev/null 2>&1
-  git submodule sync
-  git submodule update --force --recursive --init --remote
 
   yarn setup
   cp -rf "$core/packages/core/bin/config/$network" "$data" >/dev/null 2>&1
@@ -311,8 +311,6 @@ install_core() {
 update() {
   cd $core
   echo -e "${nc}"
-  git submodule sync
-  git submodule update --force --recursive --init --remote
   yarn setup
 
   local api=$(curl -Is http://127.0.0.1:5001)
@@ -544,7 +542,7 @@ db_clear() {
   dropdb ${name}_$network >/dev/null 2>&1
   createdb ${name}_$network >/dev/null 2>&1
 
-  rm $core/plugins/storage/databases/$network.sqlite
+  rm $core/plugins/storage/databases/$network.sqlite >/dev/null 2>&1
 
   if [ "$rstatus" = "online" ]; then
     start relay >/dev/null 2>&1
@@ -647,17 +645,11 @@ plugin_manage() {
     fi
 
     git pull
-    git submodule sync
-    git submodule update --recursive --remote
     yarn install >/dev/null 2>&1
 
     echo -e "\n${green}Plugin $2 updated successfully.${nc}\n"
     echo -e "${red}Restart Core for the changes to take effect.${nc}\n"
 
-      git pull
-      git submodule sync
-      git submodule update --force --recursive --init --remote
-      yarn install > /dev/null 2>&1
   else
 
     echo -e "\n${red}Plugin $2 not installed.${nc}\n"
