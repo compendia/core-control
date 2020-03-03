@@ -542,7 +542,7 @@ db_clear() {
   dropdb ${name}_$network >/dev/null 2>&1
   createdb ${name}_$network >/dev/null 2>&1
 
-  rm $core/plugins/storage/databases/$network.sqlite
+  rm $core/plugins/storage/databases/$network.sqlite >/dev/null 2>&1
 
   if [ "$rstatus" = "online" ]; then
     start relay >/dev/null 2>&1
