@@ -266,6 +266,7 @@ install_deps () {
 secure() {
   sudo apt install -y ufw fail2ban >/dev/null 2>&1
   sudo ufw allow 22/tcp >/dev/null 2>&1
+  sudo ufw allow 443/tcp >/dev/null 2>&1
   sudo ufw allow 8000/tcp >/dev/null 2>&1
   sudo ufw allow ${p2p_port}/tcp >/dev/null 2>&1
   sudo ufw allow ${api_port}/tcp >/dev/null 2>&1
