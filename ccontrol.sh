@@ -73,6 +73,9 @@ main () {
       exit 1
     fi
 
+    sudo apt-get update -y > /dev/null 2>&1
+    sudo apt-get upgrade -y > /dev/null 2>&1
+
     cd $core > /dev/null 2>&1
     git_check
 
