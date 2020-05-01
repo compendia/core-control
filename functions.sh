@@ -73,6 +73,9 @@ setefile() {
   echo "CORE_WALLET_API_PORT=$wapi_port" >>"$envFile" 2>&1
   echo "CORE_EXCHANGE_JSON_RPC_HOST=0.0.0.0" >>"$envFile" 2>&1
   echo "CORE_EXCHANGE_JSON_RPC_PORT=$rpc_port" >>"$envFile" 2>&1
+  echo "CORE_IPFS_PORT=$ipfs_port" >>"$envFile" 2>&1
+  echo "CORE_IPFS_WS_PORT=$ipfs_ws_port" >>"$envFile" 2>&1
+  echo "CORE_IPFS_GATEWAY=$ipfs_gateway" >>"$envFile" 2>&1
 
 }
 
