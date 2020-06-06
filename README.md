@@ -19,23 +19,23 @@ cd core-control
 
 Never use core as root. If you're logged in as a different user (e.g. `root`), make sure to log in to the `nos` user with `su nos`.
 
-| arg1 | arg2 | Description |
-| --- | --- | --- |
-| `install` | `core` | Install Core |
-| `update` | `core`/`self`/`check` | Update Core / Core-Control / Check |
-| `remove` | `core`/`self` | Remove Core / Core-Control |
-| `secret` | `set`/`clear` | Delegate Secret Set / Clear |
-| `start` | `relay`/`forger`/`all` | Start Core Services |
-| `restart` | `relay`/`forger`/`all`/`safe` | Restart Core Services |
-| `stop` | `relay`/`forger`/`all` | Stop Core Services |
-| `status` | `relay`/`forger`/`all` | Show Core Services Status |
-| `logs` | `relay`/`forger`/`all` | Show Core Logs |
-| `snapshot` | `create`/`restore` | Snapshot Create / Restore |
-| `system` | `info`/`update` | System Info / Update |
-| `config` | `reset` | Reset Config Files to Defaults |
-| `database` | `clear` | Clear the Database |
-| `rollback` | | Rollback to Specified Height |
-| `plugin` | `list`/`add`/`remove`/`update` | Manage Core Plugins |
+| arg1       | arg2                                 | Description                        |
+| ---------- | ------------------------------------ | ---------------------------------- |
+| `install`  | `core`                               | Install Core                       |
+| `update`   | `core`/`self`/`check`                | Update Core / Core-Control / Check |
+| `remove`   | `core`/`self`                        | Remove Core / Core-Control         |
+| `secret`   | `set`/`clear`                        | Delegate Secret Set / Clear        |
+| `start`    | `relay`/`forger`/`core`/`all`        | Start Core Services                |
+| `restart`  | `relay`/`forger`/`core`/`all`/`safe` | Restart Core Services              |
+| `stop`     | `relay`/`forger`/`core`/`all`        | Stop Core Services                 |
+| `status`   | `relay`/`forger`/`core`/`all`        | Show Core Services Status          |
+| `logs`     | `relay`/`forger`/`core`/`all`        | Show Core Logs                     |
+| `snapshot` | `create`/`restore`                   | Snapshot Create / Restore          |
+| `system`   | `info`/`update`                      | System Info / Update               |
+| `config`   | `reset`                              | Reset Config Files to Defaults     |
+| `database` | `clear`                              | Clear the Database                 |
+| `rollback` |                                      | Rollback to Specified Height       |
+| `plugin`   | `list`/`add`/`remove`/`update`       | Manage Core Plugins                |
 
 ## General
 This is a Streamlined CLI-Based Core v2 Management Tool. 
