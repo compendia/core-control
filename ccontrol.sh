@@ -142,7 +142,7 @@ main() {
     echo -e "${cyan}Configs Replaced with Defaults...${nc}"
     echo -e "${green}All Done!${nc}\n"
 
-  elif [[ ("$1" = "start") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" || -z "$2") && (-z "$3") ]]; then
+  elif [[ ("$1" = "start") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" || "$2" = "core" || -z "$2") && (-z "$3") ]]; then
 
     if [[ ! -d $data || ! -d $core ]]; then
       echo -e "\n${red}Core not installed. Please install first.${nc}\n"
@@ -157,7 +157,7 @@ main() {
 
     echo -e "\n${green}All Done!${nc}\n"
 
-  elif [[ ("$1" = "restart") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" || "$2" = "safe" || -z "$2") && (-z "$3") ]]; then
+  elif [[ ("$1" = "restart") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" ||  "$2" = "core" || "$2" = "safe" || -z "$2") && (-z "$3") ]]; then
 
     if [[ ! -d $data || ! -d $core ]]; then
       echo -e "\n${red}Core not installed. Please install first.${nc}\n"
@@ -172,7 +172,7 @@ main() {
 
     echo -e "\n${green}All Done!${nc}\n"
 
-  elif [[ ("$1" = "stop") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" || -z "$2") && (-z "$3") ]]; then
+  elif [[ ("$1" = "stop") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" ||  "$2" = "core" || -z "$2") && (-z "$3") ]]; then
 
     if [[ ! -d $data || ! -d $core ]]; then
       echo -e "\n${red}Core not installed. Please install first.${nc}\n"
@@ -187,7 +187,7 @@ main() {
 
     echo -e "\n${green}All Done!${nc}\n"
 
-  elif [[ ("$1" = "status") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" || -z "$2") && (-z "$3") ]]; then
+  elif [[ ("$1" = "status") && ("$2" = "relay" || "$2" = "forger" || "$2" = "core" || "$2" = "all" || -z "$2") && (-z "$3") ]]; then
 
     if [[ ! -d $data || ! -d $core ]]; then
       echo -e "\n${red}Core not installed. Please install first.${nc}\n"
@@ -210,7 +210,7 @@ main() {
     sudo apt update >/dev/null 2>&1
     sysupdate
 
-  elif [[ ("$1" = "logs") && ("$2" = "relay" || "$2" = "forger" || "$2" = "all" || -z "$2") && (-z "$3") ]]; then
+  elif [[ ("$1" = "logs") && ("$2" = "relay" || "$2" = "forger" || "$2" = "core" || "$2" = "all" || -z "$2") && (-z "$3") ]]; then
 
     if [ -z "$2" ]; then
       set -- "$1" "all"
