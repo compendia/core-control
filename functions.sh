@@ -189,6 +189,7 @@ stop() {
 
     local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
+    local cstatus=$(pm2status "${name}-core" | awk '{print $4}')
 
     if [ "$rstatus" = "online" ]; then
       pm2 stop ${name}-relay >/dev/null 2>&1
@@ -200,6 +201,12 @@ stop() {
       pm2 stop ${name}-forger >/dev/null 2>&1
     else
       echo -e "\n${red}Process forger not running. Skipping...${nc}"
+    fi
+
+    if [ "$cstatus" = "online" ]; then
+      pm2 stop ${name}-core >/dev/null 2>&1
+    else
+      echo -e "\n${red}Process core not running. Skipping...${nc}"
     fi
 
   else
@@ -252,18 +259,18 @@ status() {
 
 }
 
-install_deps () {
-  sudo apt-get update -y > /dev/null 2>&1
-  sudo apt-get upgrade -y > /dev/null 2>&1
-  sudo timedatectl set-ntp no > /dev/null 2>&1
-  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev libjemalloc-dev ntp gawk jq tor  > /dev/null 2>&1
-  sudo npm install -g n grunt-cli pm2@3 yarn lerna > /dev/null 2>&1
-  sudo n 12 > /dev/null 2>&1
-  pm2 install pm2-logrotate > /dev/null 2>&1
+install_deps() {
+  sudo apt-get update -y >/dev/null 2>&1
+  sudo apt-get upgrade -y >/dev/null 2>&1
+  sudo timedatectl set-ntp no >/dev/null 2>&1
+  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev libjemalloc-dev ntp gawk jq tor >/dev/null 2>&1
+  sudo npm install -g n grunt-cli pm2@3 yarn lerna >/dev/null 2>&1
+  sudo n 12 >/dev/null 2>&1
+  pm2 install pm2-logrotate >/dev/null 2>&1
 
   local pm2startup="$(pm2 startup | tail -n1)"
-  eval $pm2startup > /dev/null 2>&1
-  pm2 save > /dev/null 2>&1
+  eval $pm2startup >/dev/null 2>&1
+  pm2 save >/dev/null 2>&1
 
 }
 
