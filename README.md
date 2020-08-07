@@ -163,7 +163,8 @@ If you discover a security vulnerability within this package, please open an iss
 
 - [All Contributors](../../contributors)
 - [Georgi Stoyanov](https://github.com/geopsllc)
+- [Dean van Dugteren](https://github.com/deanpress)
 
 ## License
 
-[MIT](LICENSE) © [geopsllc](https://github.com/geopsllc)
+[MIT](LICENSE) © [nOS Limited](https://compendia.org)
