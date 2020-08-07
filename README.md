@@ -1,44 +1,46 @@
-# Core v2 Management Tool - nOS Devnet (Public Testnet) (git install)
+# Core v2 Management Tool - Compendia Mainnet (git install)
 
-A fork of https://github.com/geopsllc/core-control, modified to work with nOS's core features.
+A fork of https://github.com/geopsllc/core-control, modified to work with Compendia's core features.
 
 ## Installation
 
 ```sh
-adduser nos
-usermod -aG sudo nos
-su nos
+adduser bind
+usermod -aG sudo bind
+su bind
 cd ~
 
-git clone https://github.com/nos/core-control -b nos-devnet
+git clone https://github.com/compendia/core-control -b main
 cd core-control
 ./ccontrol.sh install core
-./ccontrol.sh start [forger/relay]
+./ccontrol.sh start [core/relay]
 ./ccontrol.sh logs all
 ```
 
-Never use core as root. If you're logged in as a different user (e.g. `root`), make sure to log in to the `nos` user with `su nos`.
+Never use core as root. If you're logged in as a different user (e.g. `root`), make sure to log in to the `bind` user with `su bind`.
 
-| arg1       | arg2                                 | Description                        |
-| ---------- | ------------------------------------ | ---------------------------------- |
-| `install`  | `core`                               | Install Core                       |
-| `update`   | `core`/`self`/`check`                | Update Core / Core-Control / Check |
-| `remove`   | `core`/`self`                        | Remove Core / Core-Control         |
-| `secret`   | `set`/`clear`                        | Delegate Secret Set / Clear        |
-| `start`    | `relay`/`forger`/`core`/`all`        | Start Core Services                |
-| `restart`  | `relay`/`forger`/`core`/`all`/`safe` | Restart Core Services              |
-| `stop`     | `relay`/`forger`/`core`/`all`        | Stop Core Services                 |
-| `status`   | `relay`/`forger`/`core`/`all`        | Show Core Services Status          |
-| `logs`     | `relay`/`forger`/`core`/`all`        | Show Core Logs                     |
-| `snapshot` | `create`/`restore`                   | Snapshot Create / Restore          |
-| `system`   | `info`/`update`                      | System Info / Update               |
-| `config`   | `reset`                              | Reset Config Files to Defaults     |
-| `database` | `clear`                              | Clear the Database                 |
-| `rollback` |                                      | Rollback to Specified Height       |
-| `plugin`   | `list`/`add`/`remove`/`update`       | Manage Core Plugins                |
+| arg1       | arg2                                 | Description                                  |
+| ---------- | ------------------------------------ | -------------------------------------------- |
+| `install`  | `core`/`core advanced`               | Install Core (`advanced` skips ufw firewall) |
+| `update`   | `core`/`self`/`check`                | Update Core / Core-Control / Check           |
+| `remove`   | `core`/`self`                        | Remove Core / Core-Control                   |
+| `secret`   | `set`/`clear`                        | Delegate Secret Set / Clear                  |
+| `start`    | `relay`/`forger`/`core`/`all`        | Start Core Services                          |
+| `restart`  | `relay`/`forger`/`core`/`all`/`safe` | Restart Core Services                        |
+| `stop`     | `relay`/`forger`/`core`/`all`        | Stop Core Services                           |
+| `status`   | `relay`/`forger`/`core`/`all`        | Show Core Services Status                    |
+| `logs`     | `relay`/`forger`/`core`/`all`        | Show Core Logs                               |
+| `snapshot` | `create`/`restore`                   | Snapshot Create / Restore                    |
+| `system`   | `info`/`update`                      | System Info / Update                         |
+| `config`   | `reset`                              | Reset Config Files to Defaults               |
+| `database` | `clear`                              | Clear the Database                           |
+| `rollback` |                                      | Rollback to Specified Height                 |
+| `plugin`   | `list`/`add`/`remove`/`update`       | Manage Core Plugins                          |
 
 ## General
-This is a Streamlined CLI-Based Core v2 Management Tool. 
+
+This is a Streamlined CLI-Based Core v2 Management Tool.
+
 - Installs fail2ban for ssh, and ufw allowing only port 22(ssh) and the cores ports.
 - For start/restart/stop/status/logs you can skip the 'all' argument as it's the default.
 - For install/remove you can skip the 'core' argument as it's the default.
@@ -63,15 +65,18 @@ The end result is that your node will start syncing from 0.
 ## Changelog
 
 ### 2.5.1
+
 - added restart safe option
 - use restart safe on update if all requirements are met
 - added plugin manager
 - snapshot now uses the core-snapshot interface
 
 ### 2.5
+
 - updated for core 2.5
 
 ### 2.4
+
 - fixed a bug in config reset
 - added log level file
 - renamed json rpc
@@ -79,20 +84,24 @@ The end result is that your node will start syncing from 0.
 - updated for core 2.4
 
 ### 2.3
+
 - added database clear functionality
 - expose the core-cli as the project name
 - added rollback functionality
 - updated for core 2.3
 
 ### 2.2
+
 - updated for core 2.2
 
 ### 2.1
+
 - made 'update core' a lot smarter
 - bump version to match core major version
 - added status argument to show process status
 
 ### 0.7
+
 - added a splash of color
 - added update check to show update availability
 - the ccontrol alias now has autocomplete for all arguments
@@ -105,6 +114,7 @@ The end result is that your node will start syncing from 0.
 - removed automatic self-update
 
 ### 0.6
+
 - added delegate secret management
 - added local snapshot management
 - added process restart capability
@@ -115,6 +125,7 @@ The end result is that your node will start syncing from 0.
 - added config reset capability
 
 ### 0.5
+
 - added system update
 - added logs display
 - network name is now pulled from .env for simpler commands
@@ -129,15 +140,19 @@ The end result is that your node will start syncing from 0.
 - pm2 now starts on boot and saves process state after start/stop
 
 ### 0.4
+
 - added system information
 
 ### 0.3
+
 - added mainnet and devnet update procedures
 
 ### 0.2
+
 - refactored code with a config file for easy migration to core v2 bridgechains
 
 ### 0.1
+
 - initial release
 
 ## Security
