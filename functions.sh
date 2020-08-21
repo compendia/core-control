@@ -235,9 +235,9 @@ status() {
     local cstatus=$(pm2status "${name}-core" | awk '{print $4}')
 
     if [ "$cstatus" = "online" ]; then
-      echo -e "core: ${green}online${nc}\n"
+      echo -e "core: ${green}online${nc}"
     else
-      echo -e "core: ${red}offline${nc}\n"
+      echo -e "core: ${red}offline${nc}"
     fi
 
     if [ "$rstatus" = "online" ]; then
