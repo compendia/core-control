@@ -234,13 +234,19 @@ status() {
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
     local cstatus=$(pm2status "${name}-core" | awk '{print $4}')
 
-    if [[ "$rstatus" = "online" || "$cstatus" = "online" ]]; then
+    if [ "$cstatus" = "online" ]; then
+      echo -e "core: ${green}online${nc}"
+    else
+      echo -e "core: ${red}offline${nc}"
+    fi
+
+    if [[ "$rstatus" = "online" ]]; then
       echo -ne "relay: ${green}online${nc} "
     else
       echo -ne "relay: ${red}offline${nc} "
     fi
 
-    if [[ "$fstatus" = "online" || "$cstatus" = "online" ]]; then
+    if [[ "$fstatus" = "online" ]]; then
       echo -e "forger: ${green}online${nc}\n"
     else
       echo -e "forger: ${red}offline${nc}\n"
@@ -265,7 +271,7 @@ install_deps() {
   sudo apt-get upgrade -y >/dev/null 2>&1
   sudo timedatectl set-ntp no >/dev/null 2>&1
   sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev libjemalloc-dev ntp gawk jq tor >/dev/null 2>&1
-  sudo npm install -g n grunt-cli pm2@3 yarn lerna >/dev/null 2>&1
+  sudo npm install -g n grunt-cli pm2 yarn lerna >/dev/null 2>&1
   sudo n 12 >/dev/null 2>&1
   pm2 install pm2-logrotate >/dev/null 2>&1
 
@@ -293,7 +299,6 @@ secure() {
 }
 
 install_db() {
-  sudo apt install -y redis-server >/dev/null 2>&1
   sudo apt install -y postgresql postgresql-contrib >/dev/null 2>&1
   sudo -u postgres psql -c "CREATE USER $USER WITH PASSWORD 'password' CREATEDB;" >/dev/null 2>&1
   dropdb ${name}_$network >/dev/null 2>&1
