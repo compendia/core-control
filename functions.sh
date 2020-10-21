@@ -240,13 +240,13 @@ status() {
       echo -e "core: ${red}offline${nc}"
     fi
 
-    if [ "$rstatus" = "online" ]; then
+    if [[ "$rstatus" = "online" ]]; then
       echo -ne "relay: ${green}online${nc} "
     else
       echo -ne "relay: ${red}offline${nc} "
     fi
 
-    if [ "$fstatus" = "online" ]; then
+    if [[ "$fstatus" = "online" ]]; then
       echo -e "forger: ${green}online${nc}\n"
     else
       echo -e "forger: ${red}offline${nc}\n"
