@@ -232,6 +232,13 @@ status() {
 
     local fstatus=$(pm2status "${name}-forger" | awk '{print $4}')
     local rstatus=$(pm2status "${name}-relay" | awk '{print $4}')
+    local cstatus=$(pm2status "${name}-core" | awk '{print $4}')
+
+    if [ "$cstatus" = "online" ]; then
+      echo -e "core: ${green}online${nc}"
+    else
+      echo -e "core: ${red}offline${nc}"
+    fi
 
     if [ "$rstatus" = "online" ]; then
       echo -ne "relay: ${green}online${nc} "
@@ -260,18 +267,21 @@ status() {
 }
 
 install_deps() {
-  sudo apt-get update -y >/dev/null 2>&1
-  sudo apt-get upgrade -y >/dev/null 2>&1
-  sudo timedatectl set-ntp no >/dev/null 2>&1
-  sudo apt install -y htop curl build-essential python git nodejs npm libpq-dev libjemalloc-dev ntp gawk jq tor >/dev/null 2>&1
-  sudo npm install n -g >/dev/null 2>&1
-  sudo npm install grunt-cli -g >/dev/null 2>&1
-  sudo npm install pm2 -g >/dev/null 2>&1
-  sudo npm install yarn -g >/dev/null 2>&1
-  sudo npm install lerna -g >/dev/null 2>&1
-  sudo n 12 >/dev/null 2>&1
-  pm2 install pm2-logrotate >/dev/null 2>&1
-
+  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  sudo apt-get update -y
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade -yq
+  sudo apt-get autoremove -y
+  sudo apt-get autoclean -y
+  sudo timedatectl set-ntp no
+  sudo DEBIAN_FRONTEND=noninteractive apt install -yq htop curl build-essential python git nodejs npm libpq-dev libjemalloc-dev ntp gawk jq tor
+  sudo npm install -g n
+  sudo n 12
+  sudo npm install -g yarn
+  sudo npm install -g grunt-cli
+  sudo npm install -g pm2@3
+  sudo npm install -g lerna
+  pm2 install pm2-logrotate
   local pm2startup="$(pm2 startup | tail -n1)"
   eval $pm2startup >/dev/null 2>&1
   pm2 save >/dev/null 2>&1
