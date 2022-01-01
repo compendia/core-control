@@ -9,8 +9,7 @@ adduser bind
 usermod -aG sudo bind
 su bind
 cd ~
-
-git clone https://github.com/compendia/core-control -b main
+git clone https://github.com/nos/core-control -b develop
 cd core-control
 ./ccontrol.sh install core
 ./ccontrol.sh start [core/relay]

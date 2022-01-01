@@ -282,7 +282,6 @@ install_deps() {
   sudo npm install -g pm2@3
   sudo npm install -g lerna
   pm2 install pm2-logrotate
-
   local pm2startup="$(pm2 startup | tail -n1)"
   eval $pm2startup >/dev/null 2>&1
   pm2 save >/dev/null 2>&1
